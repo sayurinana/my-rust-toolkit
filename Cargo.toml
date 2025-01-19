@@ -13,3 +13,4 @@ tracing-core =  { path = "../tracing/tracing-core" }
 tracing-appender = { path = "../tracing/tracing-appender" }
 tracing-error =  { path = "../tracing/tracing-error" }
 tracing-subscriber = { path = "../tracing/tracing-subscriber", features = ["env-filter", "local-time"] }
+thiserror = "2.0.11"
