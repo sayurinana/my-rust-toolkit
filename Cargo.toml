@@ -1,6 +1,6 @@
 [package]
 name = "my-rust-toolkit"
-version = "0.1.0-dev.1+checkbug"
+version = "0.1.0-dev.2"
 edition = "2021"
 
 [dependencies]

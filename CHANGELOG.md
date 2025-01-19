@@ -9,6 +9,12 @@
 
 标记了版本的会在git提交信息的\<Scope\>块中填入
 
+## [0.1.0-dev.2] - 2025-01-20T01-41-04
+
+### Changed
+
+- 删去了`logger::get_guard_from_init_tracing_subscriber_and_eyre`的文件开关，只允许参数控制是否输出到控制台，
+
 ## [0.1.0-dev.1+checkbug] - 2025-01-20T01-30-30
 
 ### Added

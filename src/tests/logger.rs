@@ -13,7 +13,6 @@ pub fn call_some_func() {
         Rotation::HOURLY,
         true,
         true,
-        true,
     );
     run_some();
 }
