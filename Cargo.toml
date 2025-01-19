@@ -1,0 +1,15 @@
+[package]
+name = "my-rust-toolkit"
+version = "0.1.0-dev.1+checkbug"
+edition = "2021"
+
+[dependencies]
+anyhow = "1.0.95"
+color-eyre = { path = "../eyre/color-eyre" }
+time = "0.3.37"
+time-macros = "0.2.19"
+tracing =  { path = "../tracing/tracing" }
+tracing-core =  { path = "../tracing/tracing-core" }
+tracing-appender = { path = "../tracing/tracing-appender" }
+tracing-error =  { path = "../tracing/tracing-error" }
+tracing-subscriber = { path = "../tracing/tracing-subscriber", features = ["env-filter", "local-time"] }
