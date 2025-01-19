@@ -6,7 +6,7 @@ use super::super::logger::*;
 pub fn call_some_func() {
     println!("请自行查看控制台输出和文件内容，以确认运行结果是否正确");
     // let t = tracing_subscriber_init();
-    let _t = get_guard_from_init_tracing_subscriber_and_eyre(
+    let t = get_guard_from_init_tracing_subscriber_and_eyre(
         "logs",
         "test",
         "log",
@@ -14,6 +14,10 @@ pub fn call_some_func() {
         true,
         true,
     );
+    match t {
+        Ok(_) => {},
+        Err(_) => {}
+    }
     run_some();
 }
 

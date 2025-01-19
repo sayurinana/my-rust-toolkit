@@ -1,4 +1,5 @@
-use anyhow::{anyhow, Result};
+use anyhow::Result;
+use color_eyre::eyre;
 use std::fs;
 use tracing_appender::{non_blocking, rolling::RollingFileAppender};
 use tracing_error::ErrorLayer;
@@ -19,7 +20,7 @@ pub fn get_guard_from_init_tracing_subscriber_and_eyre(
     rotation: Rotation,
     enable_formatting_layer: bool,
     install_eyre_color: bool,
-) -> Result<non_blocking::WorkerGuard> {
+) -> Result<non_blocking::WorkerGuard, ErrorFromInitTracingSubscriberAndEyre> {
     // if !enable_formatting_layer && !enable_file_layer {
     //     return Err(anyhow!(
     //         "既不开格式化控制台输出，也不开文件输出，你开日志干嘛？？？"
@@ -30,7 +31,7 @@ pub fn get_guard_from_init_tracing_subscriber_and_eyre(
     let env_filter = EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info"));
 
     // 获取本地时间偏移量
-    let offset_time = OffsetTime::local_rfc_3339().map_err(|err| anyhow!("{:?}", err))?;
+    let offset_time = OffsetTime::local_rfc_3339()?;
 
     let mut formatting_layer = None;
     if enable_formatting_layer {
@@ -45,15 +46,14 @@ pub fn get_guard_from_init_tracing_subscriber_and_eyre(
     }
 
     // 尝试创建日志目录，如果失败则抛出错误
-    fs::create_dir_all(logs_dir).map_err(|_| anyhow!("创建日志目录失败！"))?;
+    fs::create_dir_all(logs_dir)?;
 
     // 构建一个滚动文件追加器，用于日志文件的滚动存储
     let file_appender = RollingFileAppender::builder()
         .rotation(rotation) // 每小时滚动一次日志文件
         .filename_prefix(logfile_prefix) // 日志文件名前缀为`myapp.`
         .filename_suffix(logfile_suffix) // 日志文件名后缀为`.log`
-        .build(logs_dir)
-        .map_err(|err| anyhow!("{:?}", err))?; // 在`logs`目录下存储日志文件
+        .build(logs_dir)?; // 在`logs`目录下存储日志文件
 
     // 将文件追加器包装为非阻塞模式，以提高性能
     let (non_blocking_appender, guard) = non_blocking(file_appender);
@@ -68,7 +68,7 @@ pub fn get_guard_from_init_tracing_subscriber_and_eyre(
 
     if install_eyre_color {
         // 安装color-eyre，以提供更丰富的错误处理和报告
-        color_eyre::install().map_err(|err| anyhow!("{:?}", err))?;
+        color_eyre::install()?;
     }
 
     match formatting_layer {
@@ -91,4 +91,16 @@ pub fn get_guard_from_init_tracing_subscriber_and_eyre(
         }
     };
     return Ok(guard);
+}
+
+#[derive(thiserror::Error, Debug)]
+pub enum ErrorFromInitTracingSubscriberAndEyre {
+    #[error("获取日期时间偏移量错误")]
+    TimeOffsetGetError(#[from] time::error::IndeterminateOffset),
+    #[error(transparent)]
+    IOError(#[from] std::io::Error),
+    #[error("日志文件追加器初始化错误")]
+    AppenderInitError(#[from] tracing_appender::rolling::InitError),
+    #[error("安装color-eyre失败")]
+    EyreInstallFailure(#[from] eyre::Report),
 }
