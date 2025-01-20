@@ -1,12 +1,20 @@
-use tracing::{debug, error, info, instrument, trace, warn, Level};
-
 use super::super::logger::*;
+
+#[test]
+pub fn compare_level() {
+    assert_eq!("TRACE", format!("{}", Level::TRACE));
+    assert_eq!("DEBUG", format!("{}", Level::DEBUG));
+    assert_eq!("INFO", format!("{}", Level::INFO));
+    assert_eq!("WARN", format!("{}", Level::WARN));
+    assert_eq!("ERROR", format!("{}", Level::ERROR));
+}
 
 #[test]
 pub fn call_some_func() {
     println!("请自行查看控制台输出和文件内容，以确认运行结果是否正确");
     // let t = tracing_subscriber_init();
     let t = get_guard_from_init_tracing_subscriber_and_eyre(
+        Level::TRACE,
         "logs",
         "test",
         "log",

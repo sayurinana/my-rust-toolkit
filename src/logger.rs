@@ -7,8 +7,12 @@
 //!
 //! ## 使用示例
 //! ```rust
-//! use logger::get_guard_from_init_tracing_subscriber_and_eyre;
+//! use my_rust_toolkit::logger::get_guard_from_init_tracing_subscriber_and_eyre;
 //! use tracing_appender::rolling::Rotation;
+//! use tracing::Level;
+//! 
+//! # 或者是全部导入，因为其实东西不多就是一些状态结构和常用的日志宏
+//! use my_rust_toolkit::logger::*;
 //!
 //! fn main() {
 //!     let t = get_guard_from_init_tracing_subscriber_and_eyre(
@@ -26,6 +30,7 @@
 //!     // 你的代码逻辑
 //! }
 //! ```
+// #![allow(unused_imports)]
 use anyhow::Result;
 use color_eyre::eyre;
 use std::fs;
@@ -39,17 +44,19 @@ use tracing_subscriber::{
     Registry,
 };
 
+pub use tracing::{debug, error, info, instrument, trace, warn, Level};
 pub use tracing_appender::rolling::Rotation;
 
 /// 初始化 `tracing` 日志记录器和 `color_eyre` 错误处理器。
 ///
 /// # 参数
-/// - `logs_dir`: 日志文件存储的目录路径。
-/// - `logfile_prefix`: 日志文件名的前缀。
-/// - `logfile_suffix`: 日志文件名的后缀。
-/// - `rotation`: 日志文件的滚动策略。
-/// - `enable_formatting_layer`: 是否启用控制台格式化输出层。
-/// - `install_eyre_color`: 是否安装 `color_eyre` 的颜色支持。
+/// - `_log_filter_level`: 日志过滤器级别
+/// - `_logs_dir`: 日志文件存储的目录路径。
+/// - `_logfile_prefix`: 日志文件名的前缀。
+/// - `_logfile_suffix`: 日志文件名的后缀。
+/// - `_rotation`: 日志文件的滚动策略。
+/// - `_enable_formatting_layer`: 是否启用控制台格式化输出层。
+/// - `_install_eyre_color`: 是否安装 `color_eyre` 的颜色支持。
 ///
 /// # 返回值
 /// 返回一个 `Result`，包含 `non_blocking::WorkerGuard` 或 `ErrorFromInitTracingSubscriberAndEyre` 错误。
@@ -61,6 +68,7 @@ pub use tracing_appender::rolling::Rotation;
 ///
 /// fn main() {
 ///     let t = get_guard_from_init_tracing_subscriber_and_eyre(
+///         Level::INFO,
 ///         "logs",
 ///         "myapp",
 ///         "log",
@@ -76,12 +84,13 @@ pub use tracing_appender::rolling::Rotation;
 /// }
 /// ```
 pub fn get_guard_from_init_tracing_subscriber_and_eyre(
-    logs_dir: &str,
-    logfile_prefix: &str,
-    logfile_suffix: &str,
-    rotation: Rotation,
-    enable_formatting_layer: bool,
-    install_eyre_color: bool,
+    _log_filter_level: Level,
+    _logs_dir: &str,
+    _logfile_prefix: &str,
+    _logfile_suffix: &str,
+    _rotation: Rotation,
+    _enable_formatting_layer: bool,
+    _install_eyre_color: bool,
 ) -> Result<non_blocking::WorkerGuard, ErrorFromInitTracingSubscriberAndEyre> {
     // if !enable_formatting_layer && !enable_file_layer {
     //     return Err(anyhow!(
@@ -90,13 +99,15 @@ pub fn get_guard_from_init_tracing_subscriber_and_eyre(
     // }
 
     // 尝试从环境变量中解析日志级别，如果失败则默认为"info"级别
-    let env_filter = EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info"));
+    // let env_filter = EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info"));
+    // 改用传入的参数决定
+    let env_filter = EnvFilter::new(format!("{}", _log_filter_level));
 
     // 获取本地时间偏移量
     let offset_time = OffsetTime::local_rfc_3339()?;
 
     let mut formatting_layer = None;
-    if enable_formatting_layer {
+    if _enable_formatting_layer {
         // 创建一个格式化层，用于控制台日志输出，包含漂亮打印和本地时间戳
         formatting_layer = Some(
             fmt::layer()
@@ -108,14 +119,14 @@ pub fn get_guard_from_init_tracing_subscriber_and_eyre(
     }
 
     // 尝试创建日志目录，如果失败则抛出错误
-    fs::create_dir_all(logs_dir)?;
+    fs::create_dir_all(_logs_dir)?;
 
     // 构建一个滚动文件追加器，用于日志文件的滚动存储
     let file_appender = RollingFileAppender::builder()
-        .rotation(rotation) // 每小时滚动一次日志文件
-        .filename_prefix(logfile_prefix) // 日志文件名前缀为`myapp.`
-        .filename_suffix(logfile_suffix) // 日志文件名后缀为`.log`
-        .build(logs_dir)?; // 在`logs`目录下存储日志文件
+        .rotation(_rotation) // 每小时滚动一次日志文件
+        .filename_prefix(_logfile_prefix) // 日志文件名前缀为`myapp.`
+        .filename_suffix(_logfile_suffix) // 日志文件名后缀为`.log`
+        .build(_logs_dir)?; // 在`logs`目录下存储日志文件
 
     // 将文件追加器包装为非阻塞模式，以提高性能
     let (non_blocking_appender, guard) = non_blocking(file_appender);
@@ -128,7 +139,7 @@ pub fn get_guard_from_init_tracing_subscriber_and_eyre(
             .with_writer(non_blocking_appender),
     );
 
-    if install_eyre_color {
+    if _install_eyre_color {
         // 安装color-eyre，以提供更丰富的错误处理和报告
         color_eyre::install()?;
     }

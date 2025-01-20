@@ -9,6 +9,12 @@
 
 标记了版本的会在git提交信息的\<Scope\>块中填入
 
+## [0.3.0] - 2025-01-20T14-34-27
+
+### Changed
+
+- 对`logger::get_guard_from_init_tracing_subscriber_and_eyre`添加了日志过滤器等级参数
+
 ## [0.2.0+doc] - 2025-01-20T14-01-03
 
 ### Added
