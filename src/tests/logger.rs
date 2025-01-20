@@ -1,4 +1,4 @@
-use tracing::{debug, error, info, instrument, trace, warn};
+use tracing::{debug, error, info, instrument, trace, warn, Level};
 
 use super::super::logger::*;
 

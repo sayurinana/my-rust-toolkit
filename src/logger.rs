@@ -1,3 +1,31 @@
+//! 日志模块提供了初始化日志记录器的功能，使用 `tracing` 和 `color_eyre` 库来实现日志记录和错误处理。
+//!
+//! ## 主要功能
+//! - 初始化日志记录器，支持控制台输出和文件输出。
+//! - 提供了灵活的日志级别配置。
+//! - 支持日志文件的滚动存储。
+//!
+//! ## 使用示例
+//! ```rust
+//! use logger::get_guard_from_init_tracing_subscriber_and_eyre;
+//! use tracing_appender::rolling::Rotation;
+//!
+//! fn main() {
+//!     let t = get_guard_from_init_tracing_subscriber_and_eyre(
+//!         "logs",
+//!         "myapp",
+//!         "log",
+//!         Rotation::HOURLY,
+//!         true,
+//!         true,
+//!     );
+//!     match t {
+//!         Ok(_) => {}
+//!         Err(_) => {}
+//!     }
+//!     // 你的代码逻辑
+//! }
+//! ```
 use anyhow::Result;
 use color_eyre::eyre;
 use std::fs;
@@ -13,6 +41,40 @@ use tracing_subscriber::{
 
 pub use tracing_appender::rolling::Rotation;
 
+/// 初始化 `tracing` 日志记录器和 `color_eyre` 错误处理器。
+///
+/// # 参数
+/// - `logs_dir`: 日志文件存储的目录路径。
+/// - `logfile_prefix`: 日志文件名的前缀。
+/// - `logfile_suffix`: 日志文件名的后缀。
+/// - `rotation`: 日志文件的滚动策略。
+/// - `enable_formatting_layer`: 是否启用控制台格式化输出层。
+/// - `install_eyre_color`: 是否安装 `color_eyre` 的颜色支持。
+///
+/// # 返回值
+/// 返回一个 `Result`，包含 `non_blocking::WorkerGuard` 或 `ErrorFromInitTracingSubscriberAndEyre` 错误。
+///
+/// # 示例
+/// ```rust
+/// use logger::get_guard_from_init_tracing_subscriber_and_eyre;
+/// use tracing_appender::rolling::Rotation;
+///
+/// fn main() {
+///     let t = get_guard_from_init_tracing_subscriber_and_eyre(
+///         "logs",
+///         "myapp",
+///         "log",
+///         Rotation::HOURLY,
+///         true,
+///         true,
+///     );
+///     match t {
+///         Ok(_) => {}
+///         Err(_) => {}
+///     }
+///     // 你的代码逻辑
+/// }
+/// ```
 pub fn get_guard_from_init_tracing_subscriber_and_eyre(
     logs_dir: &str,
     logfile_prefix: &str,
