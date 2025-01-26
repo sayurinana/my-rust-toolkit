@@ -17,6 +17,7 @@ pub fn call_some_func() {
     env::set_var("RUST_LOG", "debug");
     // let t = tracing_subscriber_init();
     let t = get_guard_from_init_tracing_subscriber_and_eyre(
+        Level::INFO,
         "logs",
         "test",
         "log",

@@ -10,7 +10,7 @@
 //! use my_rust_toolkit::logger::get_guard_from_init_tracing_subscriber_and_eyre;
 //! use tracing_appender::rolling::Rotation;
 //! use tracing::Level;
-//! 
+//!
 //! # 或者是全部导入，因为其实东西不多就是一些状态结构和常用的日志宏
 //! use my_rust_toolkit::logger::*;
 //!
@@ -50,7 +50,7 @@ pub use tracing_appender::rolling::Rotation;
 /// 初始化 `tracing` 日志记录器和 `color_eyre` 错误处理器。
 ///
 /// # 参数
-/// - `_log_filter_level`: 日志过滤器级别
+/// - `_default_logger_filter_level`: 当环境变量中没有读取到 `RUST_LOG` 时，自动使用的日志过滤器级别
 /// - `_logs_dir`: 日志文件存储的目录路径。
 /// - `_logfile_prefix`: 日志文件名的前缀。
 /// - `_logfile_suffix`: 日志文件名的后缀。
@@ -69,6 +69,7 @@ pub use tracing_appender::rolling::Rotation;
 /// fn main() {
 ///     env::set_var("RUST_LOG", "debug");
 ///     let t = get_guard_from_init_tracing_subscriber_and_eyre(
+///         Level::INFO,
 ///         "logs",
 ///         "myapp",
 ///         "log",
@@ -84,6 +85,7 @@ pub use tracing_appender::rolling::Rotation;
 /// }
 /// ```
 pub fn get_guard_from_init_tracing_subscriber_and_eyre(
+    _default_logger_filter_level: Level,
     _logs_dir: &str,
     _logfile_prefix: &str,
     _logfile_suffix: &str,
@@ -98,7 +100,8 @@ pub fn get_guard_from_init_tracing_subscriber_and_eyre(
     // }
 
     // 尝试从环境变量中解析日志级别，如果失败则默认为"info"级别
-    let env_filter = EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info"));
+    let env_filter = EnvFilter::try_from_default_env()
+        .unwrap_or_else(|_| EnvFilter::new(format!("{}", _default_logger_filter_level)));
 
     // 获取本地时间偏移量
     let offset_time = OffsetTime::local_rfc_3339()?;
