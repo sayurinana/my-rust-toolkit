@@ -1,6 +1,7 @@
 [package]
 name = "my-rust-toolkit"
-version = "0.3.0"
+version = "0.4.0"
+authors = ["sayurinana <sayurinana@163.com>"]
 edition = "2021"
 
 [dependencies]

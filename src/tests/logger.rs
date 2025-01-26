@@ -1,3 +1,5 @@
+use std::env;
+
 use super::super::logger::*;
 
 #[test]
@@ -12,9 +14,9 @@ pub fn compare_level() {
 #[test]
 pub fn call_some_func() {
     println!("请自行查看控制台输出和文件内容，以确认运行结果是否正确");
+    env::set_var("RUST_LOG", "debug");
     // let t = tracing_subscriber_init();
     let t = get_guard_from_init_tracing_subscriber_and_eyre(
-        Level::TRACE,
         "logs",
         "test",
         "log",

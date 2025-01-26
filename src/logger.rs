@@ -67,8 +67,8 @@ pub use tracing_appender::rolling::Rotation;
 /// use tracing_appender::rolling::Rotation;
 ///
 /// fn main() {
+///     env::set_var("RUST_LOG", "debug");
 ///     let t = get_guard_from_init_tracing_subscriber_and_eyre(
-///         Level::INFO,
 ///         "logs",
 ///         "myapp",
 ///         "log",
@@ -84,7 +84,6 @@ pub use tracing_appender::rolling::Rotation;
 /// }
 /// ```
 pub fn get_guard_from_init_tracing_subscriber_and_eyre(
-    _log_filter_level: Level,
     _logs_dir: &str,
     _logfile_prefix: &str,
     _logfile_suffix: &str,
@@ -99,9 +98,7 @@ pub fn get_guard_from_init_tracing_subscriber_and_eyre(
     // }
 
     // 尝试从环境变量中解析日志级别，如果失败则默认为"info"级别
-    // let env_filter = EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info"));
-    // 改用传入的参数决定
-    let env_filter = EnvFilter::new(format!("{}", _log_filter_level));
+    let env_filter = EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info"));
 
     // 获取本地时间偏移量
     let offset_time = OffsetTime::local_rfc_3339()?;
